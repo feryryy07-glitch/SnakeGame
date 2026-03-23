@@ -1,0 +1,1252 @@
+/* ══════════════════════════════════════════════════════
+   SERPENT v2 — Ultimate Snake  |  style.css
+   ══════════════════════════════════════════════════════
+   Table of Contents:
+     1. CSS Variables & Themes
+     2. Reset & Base
+     3. Screen System
+     4. Menu Screen
+        4a. Background & Layout
+        4b. Logo
+        4c. Stats
+        4d. Menu Sections & Groups
+        4e. Toggle Switches
+        4f. Skin Picker
+     5. Buttons
+     6. Game Screen
+        6a. HUD (Heads-Up Display)
+        6b. Combo HUD
+        6c. Power-up Bar
+        6d. Canvas & Overlays
+        6e. Mobile D-pad
+        6f. Toolbar
+     7. Game Over Screen
+     8. Leaderboard Screen
+     9. Animations & Keyframes
+    10. Responsive (Mobile)
+    11. Scrollbar
+   ══════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════
+   1. CSS VARIABLES & THEMES
+   ══════════════════════════════════════════════════════ */
+:root {
+  /* Background shades */
+  --bg:       #07070d;
+  --bg2:      #0f0f18;
+  --surface:  #14141e;
+  --surface2: #1e1e2c;
+  --border:   #282838;
+
+  /* Text */
+  --text:  #ecebf5;
+  --text2: #8080a0;
+
+  /* Accent colours */
+  --accent:  #39ff14; /* neon green */
+  --accent2: #00d4ff; /* cyan */
+  --accent3: #ff4060; /* red */
+  --gold:    #ffd700;
+  --purple:  #b06aff;
+  --orange:  #ff8c00;
+
+  /* Typography */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono:    'Space Mono', monospace;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* Shape */
+  --radius:    10px;
+  --radius-lg: 18px;
+
+  /* Shadows */
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+
+  /* Glow effects */
+  --glow-green: 0 0 16px rgba(57, 255, 20, 0.5),  0 0 48px rgba(57, 255, 20, 0.18);
+  --glow-cyan:  0 0 16px rgba(0, 212, 255, 0.5),  0 0 48px rgba(0, 212, 255, 0.18);
+  --glow-red:   0 0 16px rgba(255, 64, 96, 0.5),  0 0 48px rgba(255, 64, 96, 0.18);
+  --glow-gold:  0 0 16px rgba(255, 215, 0, 0.5),  0 0 48px rgba(255, 215, 0, 0.18);
+
+  /* Global transition shorthand */
+  --trans: 0.2s ease;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --bg:      #ebebf5;
+  --bg2:     #e0e0ee;
+  --surface: #ffffff;
+  --surface2:#f5f5fc;
+  --border:  #c8c8dc;
+  --text:    #0f0f1a;
+  --text2:   #505070;
+  --shadow:  0 8px 32px rgba(0, 0, 0, 0.12);
+  --glow-green: 0 0 10px rgba(20, 160, 20, 0.35);
+  --glow-cyan:  0 0 10px rgba(0, 140, 200, 0.35);
+  --glow-red:   0 0 10px rgba(200, 40, 60, 0.35);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   2. RESET & BASE STYLES
+   ══════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: background 0.3s, color 0.3s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   3. SCREEN SYSTEM
+   Each screen is fullscreen and transitions with opacity.
+   Only .active screens are visible and interactive.
+   ══════════════════════════════════════════════════════ */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4a. MENU SCREEN — Background & Layout
+   ══════════════════════════════════════════════════════ */
+.menu-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 36px 36px;
+  animation: gridPan 25s linear infinite;
+}
+
+[data-theme="light"] .menu-bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+/* Decorative background snake */
+.menu-snake-anim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Main content column */
+.menu-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+  padding: 20px 20px 28px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4b. MENU SCREEN — Logo
+   ══════════════════════════════════════════════════════ */
+.logo-wrap {
+  text-align: center;
+}
+
+.logo-eye {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent), #1a7a00, var(--accent));
+  border: 2px solid var(--accent);
+  margin: 0 auto 10px;
+  box-shadow: var(--glow-green);
+  animation: eyeSpin 4s linear infinite, eyePulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.logo-eye::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: var(--bg);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.6);
+}
+
+.logo-title {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 13vw, 88px);
+  letter-spacing: 10px;
+  color: var(--accent);
+  text-shadow: var(--glow-green), 0 0 120px rgba(57, 255, 20, 0.1);
+  line-height: 1;
+}
+
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text2);
+  letter-spacing: 4px;
+  margin-top: 2px;
+}
+
+.logo-version {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  opacity: 0.6;
+  letter-spacing: 2px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4c. MENU SCREEN — Stats
+   ══════════════════════════════════════════════════════ */
+.menu-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 18px;
+  text-align: center;
+  min-width: 88px;
+}
+
+.stat-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text2);
+  letter-spacing: 2px;
+}
+
+.stat-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4d. MENU SCREEN — Sections, Groups & Choice Buttons
+   ══════════════════════════════════════════════════════ */
+.menu-section {
+  width: 100%;
+}
+
+.menu-section.row {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+
+.section-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text2);
+  margin-bottom: 7px;
+}
+
+/* Inline hint next to skin label */
+.skin-unlock-hint-inline {
+  color: var(--purple);
+  margin-left: 6px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+/* Choice buttons (difficulty, mode selectors) */
+.btn-choice {
+  flex: 1;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  transition: all var(--trans);
+  min-width: 66px;
+}
+
+.btn-choice:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-choice.active {
+  background: rgba(57, 255, 20, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--glow-green);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4e. MENU SCREEN — Toggle Switches
+   ══════════════════════════════════════════════════════ */
+.toggle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The <label> wrapper */
+.toggle {
+  position: relative;
+  width: 54px;
+  height: 27px;
+  cursor: pointer;
+  display: block;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  overflow: hidden;
+  transition: background 0.25s;
+}
+
+/* The sliding circle */
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 21px;
+  height: 21px;
+  background: var(--accent);
+  border-radius: 50%;
+  left: 3px;
+  transition: transform 0.25s;
+  box-shadow: var(--glow-green);
+  z-index: 2;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(27px);
+}
+
+.toggle input:checked + .toggle-slider {
+  background: rgba(57, 255, 20, 0.12);
+}
+
+.toggle-icon {
+  font-size: 11px;
+  z-index: 1;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   4f. MENU SCREEN — Skin Picker
+   ══════════════════════════════════════════════════════ */
+.skin-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.skin-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 4px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all var(--trans);
+  position: relative;
+  overflow: hidden;
+}
+
+.skin-card:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.skin-card.active {
+  border-color: var(--accent);
+  box-shadow: var(--glow-green);
+}
+
+/* Locked skin — dimmed, not clickable */
+.skin-card.locked {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.skin-card.locked:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+.skin-label {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: var(--text2);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.skin-card.active .skin-label {
+  color: var(--accent);
+}
+
+.skin-lock {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   5. BUTTONS
+   ══════════════════════════════════════════════════════ */
+
+/* Primary CTA button */
+.btn-primary {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  padding: 13px 30px;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 3px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all var(--trans);
+  box-shadow: var(--glow-green);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(57, 255, 20, 0.65), 0 0 72px rgba(57, 255, 20, 0.22);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary.small {
+  max-width: 140px;
+  font-size: 16px;
+  padding: 9px 18px;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+  opacity: 0;
+  transition: opacity var(--trans);
+}
+
+.btn-primary:hover .btn-glow {
+  opacity: 1;
+}
+
+/* Secondary outlined button */
+.btn-secondary {
+  padding: 9px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  border-radius: var(--radius);
+  transition: all var(--trans);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn-secondary.small {
+  padding: 9px 18px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6a. GAME SCREEN — HUD (Heads-Up Display)
+   ══════════════════════════════════════════════════════ */
+#screen-game {
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+}
+
+.hud {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glowing accent line at bottom of HUD */
+.hud::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  gap: 14px;
+}
+
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hud-label {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: var(--text2);
+}
+
+.hud-value {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--accent);
+  line-height: 1;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.hud-combo {
+  color: var(--gold);
+}
+
+.level-badge {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  transition: all 0.4s;
+}
+
+.mode-badge {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 2px;
+  color: var(--accent2);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6b. GAME SCREEN — Combo HUD popup
+   ══════════════════════════════════════════════════════ */
+.combo-hud {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-shadow: var(--glow-gold);
+  white-space: nowrap;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+  opacity: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.combo-hud.visible {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.combo-hud.boom {
+  animation: comboBoom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6c. GAME SCREEN — Power-up Bar
+   ══════════════════════════════════════════════════════ */
+.powerup-bar {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  padding: 3px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  min-height: 26px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.powerup-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  border: 1px solid;
+  animation: pillPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.powerup-pill.speed  { border-color: var(--accent3); color: var(--accent3); background: rgba(255, 64,  96,  0.12); }
+.powerup-pill.slow   { border-color: var(--accent2); color: var(--accent2); background: rgba(0,   212, 255, 0.12); }
+.powerup-pill.double { border-color: var(--gold);    color: var(--gold);    background: rgba(255, 215, 0,   0.12); }
+
+.powerup-pill .timer-track {
+  height: 3px;
+  width: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.powerup-pill .timer-fill {
+  height: 100%;
+  background: currentColor;
+  border-radius: 2px;
+  transform-origin: left;
+  animation: timerShrink linear forwards;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6d. GAME SCREEN — Canvas & Overlays
+   ══════════════════════════════════════════════════════ */
+.canvas-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  padding: 8px;
+}
+
+#gameCanvas {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.canvas-overlay {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+/* Overlays (pause, countdown) are pointer-events enabled individually */
+.canvas-overlay > div {
+  pointer-events: all;
+}
+
+.overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(7, 7, 13, 0.93);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 38px;
+  text-align: center;
+  backdrop-filter: blur(16px);
+}
+
+[data-theme="light"] .overlay-content {
+  background: rgba(235, 235, 245, 0.93);
+}
+
+/* Hidden overlays (using HTML hidden attribute or JS hidden property) */
+.overlay-content[hidden] {
+  display: none;
+}
+
+.overlay-title {
+  font-family: var(--font-display);
+  font-size: 38px;
+  letter-spacing: 4px;
+  color: var(--accent2);
+  margin-bottom: 22px;
+}
+
+.overlay-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.countdown-num {
+  font-family: var(--font-display);
+  font-size: 80px;
+  color: var(--accent);
+  text-shadow: var(--glow-green);
+  animation: countPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Level-up flash — injected as a div over the canvas */
+.levelup-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.25), transparent 70%);
+  pointer-events: none;
+  animation: levelFlash 0.6s ease-out forwards;
+  z-index: 5;
+  border-radius: var(--radius);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6e. GAME SCREEN — Mobile D-pad
+   ══════════════════════════════════════════════════════ */
+.mobile-controls {
+  /* Hidden by default; shown via JS on mobile */
+  display: none;
+  width: 100%;
+  padding: 6px 14px;
+  justify-content: space-around;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.dpad {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+}
+
+.dpad-row {
+  display: flex;
+  gap: 4px;
+}
+
+.dpad-center {
+  width: 42px;
+  height: 42px;
+}
+
+.dpad-btn {
+  width: 42px;
+  height: 42px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+  touch-action: manipulation;
+}
+
+.dpad-btn:active {
+  background: var(--surface2);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(0.92);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   6f. GAME SCREEN — Toolbar
+   ══════════════════════════════════════════════════════ */
+.toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 7px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.tool-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  color: var(--text2);
+  transition: all var(--trans);
+}
+
+.tool-btn:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   7. GAME OVER SCREEN
+   ══════════════════════════════════════════════════════ */
+#screen-gameover {
+  background: var(--bg);
+}
+
+.gameover-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 22px;
+  width: 100%;
+  max-width: 420px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gameover-icon {
+  font-size: 60px;
+  animation: wiggle 0.5s ease;
+}
+
+.gameover-title {
+  font-family: var(--font-display);
+  font-size: 46px;
+  letter-spacing: 5px;
+  color: var(--accent3);
+  text-shadow: var(--glow-red);
+}
+
+/* 2×3 grid of result stats */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.result-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.result-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text2);
+}
+
+.result-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: var(--accent);
+  margin-top: 3px;
+}
+
+/* Combo tile has gold accent */
+.result-combo {
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.result-combo .result-value {
+  color: var(--gold);
+}
+
+/* New record banner */
+.new-record {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-shadow: var(--glow-gold);
+  animation: recordPulse 1s ease-in-out infinite;
+}
+
+.new-record[hidden],
+.unlock-notif[hidden] {
+  display: none;
+}
+
+/* Skin unlock notification */
+.unlock-notif {
+  background: rgba(176, 106, 255, 0.1);
+  border: 1px solid var(--purple);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--purple);
+  text-align: center;
+  animation: slideUp 0.5s 0.3s both;
+}
+
+.unlock-name {
+  font-weight: 700;
+  margin-left: 5px;
+}
+
+.gameover-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+}
+
+.gameover-btns .btn-primary   { max-width: 100%; }
+.gameover-btns .btn-secondary { width: 100%; text-align: center; }
+
+
+/* ══════════════════════════════════════════════════════
+   8. LEADERBOARD SCREEN
+   ══════════════════════════════════════════════════════ */
+#screen-leaderboard {
+  background: var(--bg);
+}
+
+.lb-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 22px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.lb-title {
+  font-family: var(--font-display);
+  font-size: 38px;
+  letter-spacing: 6px;
+  color: var(--accent2);
+  text-shadow: var(--glow-cyan);
+}
+
+.lb-filters {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.lb-filter {
+  padding: 5px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  transition: all var(--trans);
+}
+
+.lb-filter.active,
+.lb-filter:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.lb-list {
+  width: 100%;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lb-empty {
+  text-align: center;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 36px;
+}
+
+.lb-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  animation: fadeSlide 0.3s ease;
+}
+
+/* Gold / silver / bronze top ranks */
+.lb-rank {
+  font-family: var(--font-display);
+  font-size: 22px;
+  width: 34px;
+  text-align: center;
+  color: var(--text2);
+}
+
+.lb-entry:nth-child(1) .lb-rank { color: var(--gold);   text-shadow: 0 0 12px rgba(255, 215, 0, 0.5); }
+.lb-entry:nth-child(2) .lb-rank { color: #c8c8c8; }
+.lb-entry:nth-child(3) .lb-rank { color: #cd7f32; }
+
+.lb-entry-info {
+  flex: 1;
+}
+
+.lb-entry-score {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--accent);
+  display: block;
+}
+
+.lb-entry-meta {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text2);
+  letter-spacing: 1px;
+}
+
+.lb-entry-badge {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  border: 1px solid;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.lb-entry-badge.easy   { color: #39ff14;       border-color: #39ff14; }
+.lb-entry-badge.medium { color: var(--gold);    border-color: var(--gold); }
+.lb-entry-badge.hard   { color: var(--accent3); border-color: var(--accent3); }
+
+
+/* ══════════════════════════════════════════════════════
+   9. ANIMATIONS & KEYFRAMES
+   ══════════════════════════════════════════════════════ */
+
+/* Menu background grid scroll */
+@keyframes gridPan {
+  to { background-position: 36px 36px; }
+}
+
+/* Logo eye spin + pulse */
+@keyframes eyeSpin {
+  to { filter: hue-rotate(360deg); }
+}
+
+@keyframes eyePulse {
+  0%, 100% { box-shadow: var(--glow-green); transform: scale(1); }
+  50%       { box-shadow: 0 0 36px rgba(57,255,20,.8), 0 0 90px rgba(57,255,20,.25); transform: scale(1.06); }
+}
+
+/* Background snake segments */
+@keyframes menuSnakeFade {
+  from { opacity: 0.1; }
+  to   { opacity: 0.7; }
+}
+
+/* Countdown pop */
+@keyframes countPop {
+  from { transform: scale(2.2); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* Power-up pill appear */
+@keyframes pillPop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* Power-up timer drain */
+@keyframes timerShrink {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* Level-up canvas flash */
+@keyframes levelFlash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Combo popup bounce */
+@keyframes comboBoom {
+  0%   { transform: translate(-50%, -50%) scale(1.4); }
+  100% { transform: translate(-50%, -50%) scale(1);   }
+}
+
+/* Game over slide-up */
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Game over icon wiggle */
+@keyframes wiggle {
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg);  }
+}
+
+/* New record pulsing glow */
+@keyframes recordPulse {
+  50% { opacity: 0.65; transform: scale(1.06); }
+}
+
+/* Leaderboard row slide-in */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   10. RESPONSIVE — MOBILE
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Show D-pad controls on small screens */
+  .mobile-controls {
+    display: flex;
+  }
+
+  .canvas-wrap       { padding: 5px; }
+  .hud               { padding: 6px 10px; }
+  .hud-value         { font-size: 14px; }
+  .menu-content      { padding: 14px 14px 22px; gap: 12px; }
+  .logo-title        { font-size: 54px; }
+
+  /* Collapse skin grid to 3 columns on mobile */
+  .skin-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   11. SCROLLBAR
+   ══════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }

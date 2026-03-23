@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>SERPENT v2 — Ultimate Snake</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       SCREEN: MAIN MENU
+       ═══════════════════════════════════════ -->
+  <div id="screen-menu" class="screen active">
+
+    <!-- Animated background elements -->
+    <div class="menu-bg-grid"></div>
+    <div class="menu-snake-anim" id="menuSnakeAnim"></div>
+
+    <div class="menu-content">
+
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <div class="logo-eye"></div>
+        <h1 class="logo-title">SERPENT</h1>
+        <p class="logo-sub">Ultimate Snake Experience</p>
+        <p class="logo-version">v2.0</p>
+      </div>
+
+      <!-- Stats summary -->
+      <div class="menu-stats">
+        <div class="stat-box">
+          <span class="stat-label">BEST</span>
+          <span class="stat-value" id="menuHighScore">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">GAMES</span>
+          <span class="stat-value" id="menuGamesPlayed">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">BEST COMBO</span>
+          <span class="stat-value" id="menuBestCombo">0x</span>
+        </div>
+      </div>
+
+      <!-- Skin picker -->
+      <div class="menu-section">
+        <p class="section-label">
+          SNAKE SKIN
+          <span id="skinUnlockHint" class="skin-unlock-hint-inline"></span>
+        </p>
+        <div class="skin-grid" id="skinGrid"></div>
+      </div>
+
+      <!-- Difficulty selector -->
+      <div class="menu-section">
+        <p class="section-label">DIFFICULTY</p>
+        <div class="btn-group" id="difficultyGroup">
+          <button class="btn-choice" data-value="easy">EASY</button>
+          <button class="btn-choice active" data-value="medium">MEDIUM</button>
+          <button class="btn-choice" data-value="hard">HARD</button>
+        </div>
+      </div>
+
+      <!-- Game mode selector -->
+      <div class="menu-section">
+        <p class="section-label">MODE</p>
+        <div class="btn-group" id="modeGroup">
+          <button class="btn-choice active" data-value="classic">CLASSIC</button>
+          <button class="btn-choice" data-value="obstacles">OBSTACLE</button>
+          <button class="btn-choice" data-value="ai">AI WATCH</button>
+          <button class="btn-choice" data-value="2player">2 PLAYER</button>
+        </div>
+      </div>
+
+      <!-- Toggles: theme & sound -->
+      <div class="menu-section row">
+        <div class="toggle-wrap">
+          <span class="section-label">THEME</span>
+          <label class="toggle">
+            <input type="checkbox" id="themeCheck" />
+            <span class="toggle-slider">
+              <span class="toggle-icon">🌙</span>
+              <span class="toggle-icon">☀️</span>
+            </span>
+          </label>
+        </div>
+        <div class="toggle-wrap">
+          <span class="section-label">SOUND</span>
+          <label class="toggle">
+            <input type="checkbox" id="soundCheck" checked />
+            <span class="toggle-slider">
+              <span class="toggle-icon">🔇</span>
+              <span class="toggle-icon">🔊</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnStart">
+        <span class="btn-text">START GAME</span>
+        <span class="btn-glow"></span>
+      </button>
+      <button class="btn-secondary" id="btnLeaderboard">LEADERBOARD</button>
+
+    </div><!-- /.menu-content -->
+  </div><!-- /#screen-menu -->
+
+
+  <!-- ═══════════════════════════════════════
+       SCREEN: GAME
+       ═══════════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+
+    <!-- HUD: heads-up display -->
+    <div class="hud">
+      <div class="hud-left">
+        <div class="hud-item">
+          <span class="hud-label">SCORE</span>
+          <span class="hud-value" id="hudScore">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">BEST</span>
+          <span class="hud-value" id="hudHigh">0</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div class="level-badge" id="hudLevel">LVL 1</div>
+        <div class="mode-badge" id="hudMode">CLASSIC</div>
+        <!-- Combo popup (shown when combo >= 2) -->
+        <div class="combo-hud" id="comboHud">COMBO ×1 🔥</div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-item">
+          <span class="hud-label">LENGTH</span>
+          <span class="hud-value" id="hudLength">3</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">COMBO</span>
+          <span class="hud-value hud-combo" id="hudCombo">×1</span>
+        </div>
+      </div>
+    </div><!-- /.hud -->
+
+    <!-- Active power-up indicators -->
+    <div class="powerup-bar" id="powerupBar"></div>
+
+    <!-- Game canvas + overlays -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas"></canvas>
+
+      <div class="canvas-overlay">
+        <!-- Pause overlay -->
+        <div class="overlay-content" id="pauseOverlay" hidden>
+          <h2 class="overlay-title">PAUSED</h2>
+          <div class="overlay-btns">
+            <button class="btn-primary small" id="btnResume">
+              <span class="btn-text">RESUME</span>
+            </button>
+            <button class="btn-secondary small" id="btnMenuFromPause">MENU</button>
+          </div>
+        </div>
+
+        <!-- Countdown overlay (3, 2, 1, GO) -->
+        <div class="overlay-content" id="countdownOverlay" hidden>
+          <div class="countdown-num" id="countdownNum">3</div>
+        </div>
+      </div><!-- /.canvas-overlay -->
+    </div><!-- /.canvas-wrap -->
+
+    <!-- Mobile D-pad controls -->
+    <div class="mobile-controls" id="mobileControls">
+      <!-- Player 1 D-pad -->
+      <div class="dpad" id="dpad1">
+        <button class="dpad-btn" data-dir="UP">▲</button>
+        <div class="dpad-row">
+          <button class="dpad-btn" data-dir="LEFT">◀</button>
+          <div class="dpad-center"></div>
+          <button class="dpad-btn" data-dir="RIGHT">▶</button>
+        </div>
+        <button class="dpad-btn" data-dir="DOWN">▼</button>
+      </div>
+
+      <!-- Player 2 D-pad (only in 2-player mode) -->
+      <div class="dpad" id="dpad2P" hidden>
+        <button class="dpad-btn" data-dir2="UP">▲</button>
+        <div class="dpad-row">
+          <button class="dpad-btn" data-dir2="LEFT">◀</button>
+          <div class="dpad-center"></div>
+          <button class="dpad-btn" data-dir2="RIGHT">▶</button>
+        </div>
+        <button class="dpad-btn" data-dir2="DOWN">▼</button>
+      </div>
+    </div><!-- /.mobile-controls -->
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="tool-btn" id="btnPause"        title="Pause (P)">⏸</button>
+      <button class="tool-btn" id="btnRestart"      title="Restart (R)">↺</button>
+      <button class="tool-btn" id="btnSoundGame"    title="Toggle Sound">🔊</button>
+      <button class="tool-btn" id="btnMenuFromGame" title="Back to Menu">⌂</button>
+    </div>
+
+  </div><!-- /#screen-game -->
+
+
+  <!-- ═══════════════════════════════════════
+       SCREEN: GAME OVER
+       ═══════════════════════════════════════ -->
+  <div id="screen-gameover" class="screen">
+    <div class="gameover-content">
+
+      <div class="gameover-icon" id="gameoverIcon">💀</div>
+      <h2 class="gameover-title" id="gameoverTitle">GAME OVER</h2>
+
+      <!-- Results grid -->
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="result-label">SCORE</span>
+          <span class="result-value" id="resultScore">0</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">HIGH SCORE</span>
+          <span class="result-value" id="resultHigh">0</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">LENGTH</span>
+          <span class="result-value" id="resultLength">3</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">LEVEL</span>
+          <span class="result-value" id="resultLevel">1</span>
+        </div>
+        <div class="result-item result-combo">
+          <span class="result-label">BEST COMBO</span>
+          <span class="result-value" id="resultCombo">×1</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">TOTAL FOOD</span>
+          <span class="result-value" id="resultFood">0</span>
+        </div>
+      </div>
+
+      <!-- New record banner -->
+      <div class="new-record" id="newRecord" hidden>✨ NEW RECORD ✨</div>
+
+      <!-- Skin unlock notification -->
+      <div class="unlock-notif" id="unlockNotif" hidden>
+        <span>🎉 SKIN UNLOCKED: </span>
+        <span class="unlock-name" id="unlockName"></span>
+      </div>
+
+      <div class="gameover-btns">
+        <button class="btn-primary" id="btnPlayAgain">
+          <span class="btn-text">PLAY AGAIN</span>
+          <span class="btn-glow"></span>
+        </button>
+        <button class="btn-secondary" id="btnMenuFromGameover">MAIN MENU</button>
+      </div>
+
+    </div>
+  </div><!-- /#screen-gameover -->
+
+
+  <!-- ═══════════════════════════════════════
+       SCREEN: LEADERBOARD
+       ═══════════════════════════════════════ -->
+  <div id="screen-leaderboard" class="screen">
+    <div class="lb-content">
+
+      <h2 class="lb-title">LEADERBOARD</h2>
+
+      <div class="lb-filters">
+        <button class="lb-filter active" data-filter="all">ALL</button>
+        <button class="lb-filter" data-filter="easy">EASY</button>
+        <button class="lb-filter" data-filter="medium">MEDIUM</button>
+        <button class="lb-filter" data-filter="hard">HARD</button>
+      </div>
+
+      <div class="lb-list" id="lbList">
+        <p class="lb-empty">No records yet!</p>
+      </div>
+
+      <button class="btn-secondary" id="btnLbBack">← BACK</button>
+
+    </div>
+  </div><!-- /#screen-leaderboard -->
+
+
+  <!-- Game script (deferred so DOM is ready) -->
+  <script src="script.js" defer></script>
+
+</body>
+</html>
